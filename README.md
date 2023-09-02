@@ -20,7 +20,7 @@ facilisis dui, ut sollicitudin eros vestibulum in. Quisque lacinia
 orci in volutpat dignissim.
 ```
 
-With `justify` it will return
+With `justify` it will return:
 ```
 Lorem  ipsum  dolor  sit  amet, consectetur adipiscing elit.
 Sed   pretium,   velit   vel   rhoncus   tempus,   urna  sem
