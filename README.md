@@ -2,6 +2,7 @@
 Create nicely formatted text outputs where lines have uniform width, and margins are aligned.
 
 ### Example:
+The `fmt` tool transforms the text this way:
 ```
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed pretium,
 velit vel rhoncus tempus, urna sem pellentesque urna, id laoreet mauris
@@ -18,7 +19,7 @@ ut sollicitudin eros vestibulum in. Quisque lacinia orci in volutpat
 dignissim.
 ```
 
-Will return
+With `justify` will return
 ```
 Lorem  ipsum  dolor  sit  amet, consectetur adipiscing elit.
 Sed   pretium,   velit   vel   rhoncus   tempus,   urna  sem
