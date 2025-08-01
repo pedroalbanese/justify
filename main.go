@@ -17,9 +17,10 @@ func justifyText(text string, width, margin int) string {
 	paragraphs := strings.Split(text, lineBreak+lineBreak)
 	justifiedText := ""
 
-	for _, paragraph := range paragraphs {
-		for i := 0; i < len(paragraph) && paragraph[i] == ' '; i++ {
-			paragraph = paragraph[:i] + marker + paragraph[i+1:]
+	for i, paragraph := range paragraphs {
+		// Marcar espaços iniciais com um marcador invisível
+		for j := 0; j < len(paragraph) && paragraph[j] == ' '; j++ {
+			paragraph = paragraph[:j] + marker + paragraph[j+1:]
 		}
 
 		lines := strings.Split(paragraph, "\n")
@@ -53,8 +54,9 @@ func justifyText(text string, width, margin int) string {
 			justifiedLines = append(justifiedLines, currentLine)
 		}
 
-		for i, line := range justifiedLines {
-			if i < len(justifiedLines)-1 {
+		// Justifica todas as linhas exceto a última do parágrafo
+		for j, line := range justifiedLines {
+			if j < len(justifiedLines)-1 {
 				words := strings.Fields(line)
 				numWords := len(words)
 				if numWords > 1 {
@@ -67,9 +69,9 @@ func justifyText(text string, width, margin int) string {
 					remaining := extraSpaces % (numWords - 1)
 
 					justifiedLine := strings.Repeat(" ", margin)
-					for j, word := range words {
+					for k, word := range words {
 						justifiedLine += word
-						if j < numWords-1 {
+						if k < numWords-1 {
 							spaces := spaceBetween
 							if remaining > 0 {
 								spaces++
@@ -79,12 +81,19 @@ func justifyText(text string, width, margin int) string {
 						}
 					}
 
-					justifiedLines[i] = justifiedLine
+					justifiedLines[j] = justifiedLine
 				}
 			}
 		}
 
-		justifiedText += strings.Replace(strings.Join(justifiedLines, "\n"), marker, " ", -1) + "\n\n"
+		// Monta o parágrafo justificado
+		justifiedParagraph := strings.Replace(strings.Join(justifiedLines, "\n"), marker, " ", -1)
+		justifiedText += justifiedParagraph
+
+		// Adiciona quebra dupla apenas entre parágrafos
+		if i < len(paragraphs)-1 {
+			justifiedText += "\n\n"
+		}
 	}
 
 	return justifiedText
