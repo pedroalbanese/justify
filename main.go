@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"unicode/utf8"
 )
 
 const marker = "\u0008"
@@ -17,7 +18,6 @@ func justifyText(text string, width, margin int) string {
 	justifiedText := ""
 
 	for _, paragraph := range paragraphs {
-		// Replace initial spaces with underlines (or any other character you prefer)
 		for i := 0; i < len(paragraph) && paragraph[i] == ' '; i++ {
 			paragraph = paragraph[:i] + marker + paragraph[i+1:]
 		}
@@ -28,12 +28,25 @@ func justifyText(text string, width, margin int) string {
 		for _, line := range lines {
 			words := strings.Fields(line)
 			currentLine := strings.Repeat(" ", margin)
+			currentLen := utf8.RuneCountInString(currentLine)
+
 			for _, word := range words {
-				if len(currentLine)+len(word)+1 <= margin+width {
-					currentLine += word + " "
+				wordLen := utf8.RuneCountInString(word)
+				extraSpace := 0
+				if currentLen > margin {
+					extraSpace = 1
+				}
+				if currentLen+wordLen+extraSpace <= margin+width {
+					if currentLen > margin {
+						currentLine += " "
+						currentLen++
+					}
+					currentLine += word
+					currentLen += wordLen
 				} else {
 					justifiedLines = append(justifiedLines, currentLine)
-					currentLine = strings.Repeat(" ", margin) + word + " "
+					currentLine = strings.Repeat(" ", margin) + word
+					currentLen = margin + wordLen
 				}
 			}
 
@@ -45,19 +58,24 @@ func justifyText(text string, width, margin int) string {
 				words := strings.Fields(line)
 				numWords := len(words)
 				if numWords > 1 {
-					extraSpaces := width - len(strings.Join(words, ""))
-					spaces := extraSpaces / (numWords - 1)
-					extraSpaces %= numWords - 1
+					totalChars := 0
+					for _, word := range words {
+						totalChars += utf8.RuneCountInString(word)
+					}
+					extraSpaces := width - totalChars
+					spaceBetween := extraSpaces / (numWords - 1)
+					remaining := extraSpaces % (numWords - 1)
 
 					justifiedLine := strings.Repeat(" ", margin)
-					for i, word := range words {
+					for j, word := range words {
 						justifiedLine += word
-						if i < numWords-1 {
-							justifiedLine += strings.Repeat(" ", spaces)
-							if extraSpaces > 0 {
-								justifiedLine += " "
-								extraSpaces--
+						if j < numWords-1 {
+							spaces := spaceBetween
+							if remaining > 0 {
+								spaces++
+								remaining--
 							}
+							justifiedLine += strings.Repeat(" ", spaces)
 						}
 					}
 
@@ -74,12 +92,9 @@ func justifyText(text string, width, margin int) string {
 
 func detectLineBreak(text string) string {
 	if strings.Contains(text, "\r\n") {
-		return "\r\n" // Windows CRLF
-	} else if strings.Contains(text, "\n") {
-		return "\n" // Unix LF
-	} else {
-		return ""
+		return "\r\n"
 	}
+	return "\n"
 }
 
 func main() {
@@ -89,12 +104,8 @@ func main() {
 
 	reader := bufio.NewReader(os.Stdin)
 	textBytes, _ := ioutil.ReadAll(reader)
-
 	text := string(textBytes)
 
-	// Justify the text
-	justifiedText := justifyText(text, *width, *margin)
-
-	// Display the justified text
-	fmt.Print(justifiedText)
+	justified := justifyText(text, *width, *margin)
+	fmt.Print(justified)
 }
